@@ -1,0 +1,52 @@
+# ServerProperties 配置类
+# 项目启动端口
+server:
+  # 项目启动端口
+  port: 8080
+  # 项目启动名（路径）
+  servlet:
+    context-path: /community
+
+# ThymeleafProperties
+# 开发时关闭thymeleaf模板引擎缓存
+spring:
+  thymeleaf:
+    cache: false
+
+  # DataSourceProperties
+  # 数据源配置
+  datasource:
+    # 数据库连接配置
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/community?serverTimezone=UTC
+    username: root
+    password: 123456
+    # 连接池配置
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      # 最大连接数
+      maximum-pool-size: 15
+      # 最小连接数
+      minimum-idle: 5
+      # 空闲时间（ms）
+      idle-timeout: 30000
+
+# MybatisProperties
+# mybatis 配置
+mybatis:
+  # mapper 映射文件路径
+  mapper-locations: classpath:mapper/*.xml
+  # mapper对应实体类所在包(可以在mapper.xml中省略实体类的全限定包名)
+  type-aliases-package: com.study.community.entity
+  configuration:
+    # 启用自动生成主键（自增长字段）
+    use-generated-keys: true
+    # 自动适应驼峰式命名
+    map-underscore-to-camel-case: true
+
+# 日志配置 更复杂的logback配置在logback-spring（只要是这个名字，spring就会自动识别并启动它）中
+#logging:
+#  level:
+#    com.study.community.dao: debug
+#  file:
+#    path: D:/study/idea-workspace/SpringBoot-bbs/community/community.log

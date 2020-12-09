@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.study.community.dao.DiscussPostMapper">
+
+    <sql id="selectFields">
+        id, user_id, title, content, type, status, create_time, comment_count, score
+    </sql>
+
+    <!-- 注意：此处返回类型是List<DiscussPost>，List可以被解析（因为它是Java自带的类型），所以只需要声明好DiscussPost -->
+    <!-- 动态sql：若user_id不为0时将userId加入到查询条件中，根据类型（置顶的排在上面，然后再按照时间排序）  -->
+    <select id="selectDiscussPosts" resultType="DiscussPost">
+        select <include refid="selectFields"></include>
+        from discuss_post
+        where status != 2
+        <if test="userId != 0">
+            and user_id = #{userId}
+        </if>
+        order by type desc, create_time desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="selectDiscussPostRows" resultType="int">
+        select count(1)
+        from discuss_post
+        where status != 2
+        <if test="userId">
+            and user_id = #{userId}
+        </if>
+    </select>
+
+</mapper>
