@@ -12,8 +12,15 @@ import java.util.List;
  **/
 public interface DiscussPostService {
 
-    public List<DiscussPost> findDiscussPosts(int userId, int offset, int limit);
+    List<DiscussPost> findDiscussPosts(int userId, int offset, int limit);
 
-    public int findDiscussPostRows(int userId);
+    int findDiscussPostRows(int userId);
+
+    int addDiscussPost(DiscussPost discussPost);
+
+    DiscussPost findDiscussPostById(int id);
+
+    //增加评论时更新帖子的评论数
+    int updateCommentCount(int id,int commentCount);
 
 }

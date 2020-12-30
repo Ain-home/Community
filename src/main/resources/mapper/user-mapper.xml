@@ -21,7 +21,6 @@
     <select id="selectByName" resultType="User">
         select <include refid="selectAllFields"></include>
         from user
-
         where username = #{username}
     </select>
     <select id="selectByEmail" resultType="User">
@@ -31,8 +30,8 @@
     </select>
 
     <insert id="insertUser" parameterType="User" keyProperty="id">
-        insert into user <include refid="insertFields"></include>
-        values (#{username},#{password},#{salt},#{email},#{type},#{status},#{activationCode},#{headerUrl},#{createTime})
+        insert into user (<include refid="insertFields"></include>)
+        values(#{username}, #{password}, #{salt}, #{email}, #{type}, #{status}, #{activationCode}, #{headerUrl}, #{createTime})
     </insert>
 
     <update id="updateStatus">
@@ -40,7 +39,7 @@
     </update>
 
     <update id="updateHeader">
-        update user set headerUrl = #{headerUrl} where id = #{id}
+        update user set header_url = #{headerUrl} where id = #{id}
     </update>
 
     <update id="updatePassword">

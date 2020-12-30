@@ -8,6 +8,10 @@
         id, user_id, title, content, type, status, create_time, comment_count, score
     </sql>
 
+    <sql id="insertFields">
+        user_id, title, content, type, status, create_time, comment_count, score
+    </sql>
+
     <!-- 注意：此处返回类型是List<DiscussPost>，List可以被解析（因为它是Java自带的类型），所以只需要声明好DiscussPost -->
     <!-- 动态sql：若user_id不为0时将userId加入到查询条件中，根据类型（置顶的排在上面，然后再按照时间排序）  -->
     <select id="selectDiscussPosts" resultType="DiscussPost">
@@ -29,5 +33,20 @@
             and user_id = #{userId}
         </if>
     </select>
+
+    <select id="selectDiscussPostById" resultType="DiscussPost">
+        select <include refid="selectFields"></include>
+        from discuss_post
+        where id = #{id}
+    </select>
+
+    <insert id="insertDiscussPost" parameterType="DiscussPost">
+        insert into discuss_post (<include refid="insertFields"></include>)
+        values(#{userId}, #{title}, #{content}, #{type}, #{status}, #{createTime}, #{commentCount}, #{score})
+    </insert>
+    
+    <update id="updateCommentCount">
+        update discuss_post set comment_count = #{commentCount} where id = #{id}
+    </update>
 
 </mapper>

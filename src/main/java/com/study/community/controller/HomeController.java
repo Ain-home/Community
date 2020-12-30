@@ -2,15 +2,15 @@ package com.study.community.controller;
 
 import com.study.community.entity.DiscussPost;
 import com.study.community.service.DiscussPostService;
+import com.study.community.service.LikeService;
 import com.study.community.service.UserService;
+import com.study.community.utils.CommunityConstant;
+import com.study.community.utils.CommunityUtil;
 import com.study.community.vo.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import sun.text.normalizer.NormalizerBase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,16 +21,20 @@ import java.util.Map;
  * @ClassName community HomeController
  * @Author 陈必强
  * @Date 2020/12/6 20:37
- * @Description TODO
+ * @Description 主页
  **/
 @Controller
-public class HomeController {
+public class HomeController implements CommunityConstant {
 
     @Autowired
     private DiscussPostService discussPostService;
 
     @Autowired
     private UserService userService;
+
+    //获取帖子点赞数
+    @Autowired
+    private LikeService likeService;
 
     // 等价于 @RequestMapping(path = "/",method = RequestMethod.GET)
     @GetMapping("/index")
@@ -50,6 +54,10 @@ public class HomeController {
                 Map<String,Object> map = new HashMap<>();
                 map.put("discussPost",post);
                 map.put("user",userService.findUserById(post.getUserId()));
+                //该帖子的点赞数
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_DISCUSS,post.getId());
+                map.put("likeCount",likeCount);
+
                 discussPosts.add(map);
             }
         }
@@ -57,5 +65,12 @@ public class HomeController {
         model.addAttribute("discussPosts",discussPosts);
         return "index";
     }
+
+    //获取到错误页面
+    @GetMapping("/error")
+    public String GetErrorPage(){
+        return "error/500";
+    }
+
 
 }

@@ -13,12 +13,12 @@ spring:
   thymeleaf:
     cache: false
 
-  # DataSourceProperties
+  # DataSourceAutoConfiguration
   # 数据源配置
   datasource:
     # 数据库连接配置
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/community?serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/community?serverTimezone=Asia/Shanghai
     username: root
     password: 123456
     # 连接池配置
@@ -30,6 +30,31 @@ spring:
       minimum-idle: 5
       # 空闲时间（ms）
       idle-timeout: 30000
+
+  # MailSenderAutoConfiguration  邮箱参数配置
+  mail:
+    # 邮箱域名
+    host: smtp.qq.com
+    # 端口（几乎所有邮箱默认的端口都是 465）
+    port: 465
+    # 邮箱的账号（自己定义也可以）密码(QQ邮箱的密码要改为QQ邮箱的授权码)
+    username: cbq981@qq.com
+    password: oxhmwzttexdybaji
+    # 协议 (后面加个s表示它使用的是加密的smtp协议)
+    protocol: smtps
+    # 其他配置 Map数据类型  采用ssl安全连接的方式
+    properties: {mail.smtp.ssl.enable : true}
+
+  # RedisAutoConfiguration   Redis自动配置类
+  redis:
+    # 哪个库  0-15
+    database: 11
+    # ip
+    host: localhost
+    # 端口
+    port: 6379
+    # 其他参数都用默认值
+
 
 # MybatisProperties
 # mybatis 配置
@@ -50,3 +75,12 @@ mybatis:
 #    com.study.community.dao: debug
 #  file:
 #    path: D:/study/idea-workspace/SpringBoot-bbs/community/community.log
+
+# 自定义的配置 community
+community:
+  path:
+    # 域名（没有正式的域名，就先写本机的地址）
+    domain: http://localhost:8080
+    # 上传文件保存的路径
+    upload: d:/study/idea-workspace/SpringBoot-bbs/upload-imgs
+
