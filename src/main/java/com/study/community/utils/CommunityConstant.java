@@ -10,6 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
  **/
 public interface CommunityConstant {
 
+    /**
+     * 系统用户id
+     */
+    int SYSTEM_USER_ID = 1;
+
     //账户激活情况
     /**
      * 激活成功
@@ -45,7 +50,29 @@ public interface CommunityConstant {
      */
     int ENTITY_TYPE_COMMENT = 2;
 
+    /**
+     * 实体类型：用户
+     */
+    int ENTITY_TYPE_USER = 3;
 
+    /**
+     * 事件的topic:评论
+     */
+    String TOPIC_COMMENT = "comment";
 
+    /**
+     * 事件的topic:点赞
+     */
+    String TOPIC_LIKE = "like";
+
+    /**
+     * 事件的topic:关注
+     */
+    String TOPIC_FOLLOW = "follow";
+
+    /**
+     * 事件的topic：发帖
+     */
+    String TOPIC_PUBLISH = "publish";
 
 }

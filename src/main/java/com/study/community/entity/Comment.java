@@ -16,7 +16,7 @@ public class Comment {
     private int entityType;
     //XX的ID
     private int entityId;
-    //是否为回复
+    //是否为评论回复（帖子回复）
     private int targetId;
     private String content;
     //评论的状态

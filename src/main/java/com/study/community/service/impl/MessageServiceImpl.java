@@ -14,7 +14,7 @@ import java.util.List;
  * @ClassName community MessageServiceImpl
  * @Author 陈必强
  * @Date 2020/12/24 20:15
- * @Description 私信
+ * @Description 私信和系统通知
  **/
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -64,6 +64,26 @@ public class MessageServiceImpl implements MessageService {
     public int readMessages(List<Integer> ids) {
         //status=1表示已读
         return messageMapper.updateStatus(ids,1);
+    }
+
+    @Override
+    public Message findLatestNotice(int userId, String topic) {
+        return messageMapper.selectLatestNotice(userId, topic);
+    }
+
+    @Override
+    public int findNoticeCount(int userId, String topic) {
+        return messageMapper.selectNoticeCount(userId, topic);
+    }
+
+    @Override
+    public int findNoticeUnreadCount(int userId, String topic) {
+        return messageMapper.selectNoticeUnreadCount(userId, topic);
+    }
+
+    @Override
+    public List<Message> findNotices(int userId, String topic, int offset, int limit) {
+        return messageMapper.selectNotices(userId,topic,offset,limit);
     }
 
 }

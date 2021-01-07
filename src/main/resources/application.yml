@@ -2,7 +2,7 @@
 # 项目启动端口
 server:
   # 项目启动端口
-  port: 8080
+  port: 8888
   # 项目启动名（路径）
   servlet:
     context-path: /community
@@ -55,6 +55,23 @@ spring:
     port: 6379
     # 其他参数都用默认值
 
+  # KafkaProperties
+  # kafka配置
+  kafka:
+    # 服务器（9092） server
+    bootstrap-servers: localhost:9092
+    # 消费者 consumer
+    consumer:
+      # 消费者分组id
+      group-id: test-consumer-group
+      # 是否自动提交消费者的偏移量offset
+      enable-auto-commit: true
+      # 自动提交的频率（ms）
+      auto-commit-interval: 3000
+
+  # ElasticsearchProperties
+  # Elasticsearch 配置（7.x版本需要编写配置类）
+  
 
 # MybatisProperties
 # mybatis 配置
@@ -80,7 +97,7 @@ mybatis:
 community:
   path:
     # 域名（没有正式的域名，就先写本机的地址）
-    domain: http://localhost:8080
+    domain: http://localhost:8888
     # 上传文件保存的路径
     upload: d:/study/idea-workspace/SpringBoot-bbs/upload-imgs
 

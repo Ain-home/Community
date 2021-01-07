@@ -14,6 +14,9 @@ import java.util.List;
 @Mapper
 public interface CommentMapper {
 
+    //根据id查询评论
+    Comment selectCommentById(int id);
+
     //根据实体来分页查询评论（帖子的评论，课程的评论）--[status = 0]
     List<Comment> selectCommentsByEntity(int entityType,int entityId,int offset,int limit);
 

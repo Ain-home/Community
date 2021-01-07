@@ -2,7 +2,10 @@ package com.study.community.controller;
 
 import com.study.community.annotation.LoginRequired;
 import com.study.community.entity.User;
+import com.study.community.service.FollowService;
+import com.study.community.service.LikeService;
 import com.study.community.service.UserService;
+import com.study.community.utils.CommunityConstant;
 import com.study.community.utils.CommunityUtil;
 import com.study.community.utils.HostHolder;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +35,7 @@ import java.io.OutputStream;
  **/
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements CommunityConstant {
 
     //日志记录
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -49,6 +52,10 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private LikeService likeService;
+    @Autowired
+    private FollowService followService;
 
     //从 HostHolder 中获取当前登录的用户（即为要修改信息的用户）
     @Autowired
@@ -140,5 +147,37 @@ public class UserController {
             logger.error("读取头像图片失败：" + e.getMessage());
         }
     }
+
+    //转到用户个人信息页面
+    @GetMapping("/profile/{userId}")
+    public String ProfilePage(@PathVariable("userId") int userId,Model model){
+        User user = userService.findUserById(userId);
+        if(user == null){
+            throw new RuntimeException("该用户不存在！");
+        }
+
+        //返回用户信息
+        model.addAttribute("user",user);
+        //查询用户获赞数
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount",likeCount);
+        //查询该用户关注的数量
+        long followeeCount = followService.findFolloweeCount(userId,ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount",followeeCount);
+        //该用户粉丝数量
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER,userId);
+        model.addAttribute("followerCount",followerCount);
+        //当前登录用户是否关注该用户
+        boolean hasFollowed = false;   //默认未关注
+        if(hostHolder.getUser() != null){
+            //只有当前用户不为空（即登录了）才有可能为true
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(),ENTITY_TYPE_USER,userId);
+        }
+        model.addAttribute("hasFollowed",hasFollowed);
+
+        return "site/profile";
+    }
+
+
 
 }

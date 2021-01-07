@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
  * @Description 登录凭证mapper(在User的业务层使用::登录)
  **/
 @Mapper
+@Deprecated   //不推荐使用
 public interface LoginTicketMapper {
 
     int insertLoginTicket(LoginTicket loginTicket);

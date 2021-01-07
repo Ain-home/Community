@@ -12,6 +12,9 @@ import java.util.List;
  **/
 public interface CommentService {
 
+    //根据id查询评论
+    Comment findCommentById(int id);
+
     //查询某一页评论
     List<Comment> findCommentsByEntity(int entityType,int entityId,int offset,int limit);
 

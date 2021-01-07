@@ -2,9 +2,12 @@ package com.study.community.controller;
 
 import com.study.community.annotation.LoginRequired;
 import com.study.community.entity.User;
+import com.study.community.event.EventProducer;
 import com.study.community.service.LikeService;
+import com.study.community.utils.CommunityConstant;
 import com.study.community.utils.CommunityUtil;
 import com.study.community.utils.HostHolder;
+import com.study.community.vo.Event;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,7 +25,7 @@ import java.util.Map;
  * @Description 点赞
  **/
 @Controller
-public class LikeController {
+public class LikeController implements CommunityConstant {
 
     @Autowired
     private LikeService likeService;
@@ -31,15 +34,19 @@ public class LikeController {
     @Autowired
     private HostHolder hostHolder;
 
+    //使用kafka发送系统通知,注入事件生产者
+    @Autowired
+    private EventProducer eventProducer;
+
     //异步请求（点赞）  POST请求
     @PostMapping("/like")
     @ResponseBody
     @LoginRequired   //需要登录才能访问，不然返回登录页面
-    public String like(int entityType,int entityId){
+    public String like(int entityType,int entityId,int entityUserId, int discussPostId){
         User user = hostHolder.getUser();
 
         //点赞
-        likeService.like(user.getId(),entityType,entityId);
+        likeService.like(user.getId(),entityType,entityId,entityUserId);
         //统计点赞数量
         long likeCount = likeService.findEntityLikeCount(entityType, entityId);
         //点赞状态
@@ -49,6 +56,20 @@ public class LikeController {
         Map<String,Object> map = new HashMap<>();
         map.put("likeCount",likeCount);
         map.put("likeStatus",likeStatus);
+
+        //点赞后【取消点赞不触发】，触发点赞事件，生产者发送系统通知
+        if(likeStatus == 1){
+            //点赞时（排除取消点赞的情况）
+            Event event = new Event()
+                    .setTopic(TOPIC_LIKE)
+                    .setUserId(hostHolder.getUser().getId())
+                    .setEntityType(entityType)
+                    .setEntityId(entityId)
+                    .setEntityUserId(entityUserId)
+                    //其他数据（点击查看时可以查看被点赞帖子的详情）
+                    .setData("discussPostId",discussPostId);
+            eventProducer.fireEvent(event);
+        }
 
         //返回JSON格式数据
         return CommunityUtil.GetJSON(0,null,map);

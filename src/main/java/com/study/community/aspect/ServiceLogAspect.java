@@ -36,6 +36,11 @@ public class ServiceLogAspect {
         //用户（ip地址）,在XXX时间，访问了com.study.community.service.xxx方法
         //获取request
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if(attributes == null){
+            //大多数情况下调用service都是在controller中调用，都有request
+            //但消费者在调用MessageService是没有request的，需要额外处理
+            return;
+        }
         HttpServletRequest request = attributes.getRequest();
         //获取ip
         String ip = request.getRemoteHost();

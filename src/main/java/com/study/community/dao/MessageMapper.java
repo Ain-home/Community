@@ -35,4 +35,17 @@ public interface MessageMapper {
     //更改消息状态（设置为已读）
     int updateStatus(List<Integer> ids,int status);
 
+    //三类主题【评论、点赞、关注】的系统通知，只显示最后一条消息
+    //查询某个主题下最新的通知
+    Message selectLatestNotice(int userId, String topic);
+
+    //查询某个主题所包含的通知数量
+    int selectNoticeCount(int userId, String topic);
+
+    //查询某个主题未读的通知数量(当topic为null时表示查所有主题的通知数量)
+    int selectNoticeUnreadCount(int userId, String topic);
+
+    //查询某个主题所包含的系统通知列表（分页显示）
+    List<Message> selectNotices(int userId,String topic,int offset,int limit);
+
 }

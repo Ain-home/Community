@@ -3,6 +3,7 @@ package com.study.community.controller;
 import com.study.community.entity.Comment;
 import com.study.community.entity.DiscussPost;
 import com.study.community.entity.User;
+import com.study.community.event.EventProducer;
 import com.study.community.service.CommentService;
 import com.study.community.service.DiscussPostService;
 import com.study.community.service.LikeService;
@@ -10,6 +11,7 @@ import com.study.community.service.UserService;
 import com.study.community.utils.CommunityConstant;
 import com.study.community.utils.CommunityUtil;
 import com.study.community.utils.HostHolder;
+import com.study.community.vo.Event;
 import com.study.community.vo.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,6 +40,10 @@ public class DiscussPostController implements CommunityConstant {
     @Autowired
     private LikeService likeService;
 
+    //处理发帖事件（kafka消息队列）
+    @Autowired
+    private EventProducer eventProducer;
+
     @Autowired
     private HostHolder hostHolder;
 
@@ -60,6 +66,15 @@ public class DiscussPostController implements CommunityConstant {
         //type,status,commentCount,score默认为0
         discussPost.setCreateTime(new Date());
         discussPostService.addDiscussPost(discussPost);
+
+        //发布帖子后，触发发帖事件（把新发布的帖子添加到es中）
+        Event event =new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_DISCUSS)
+                .setEntityId(discussPost.getId());
+        //EntityUserId用不上，可以省略
+        eventProducer.fireEvent(event);
 
         //报错情况额外处理（全局错误处理）
         return CommunityUtil.GetJSON(0,"发布成功！");
