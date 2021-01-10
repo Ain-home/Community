@@ -37,6 +37,17 @@ public class RedisKeyUtil {
     //key前缀
     private static final String PREFIX_USER = "user";
 
+    //使用Redis统计网站的数据
+    // UV  key前缀
+    private static final String PREFIX_UV = "uv";
+    // DAU  key前缀
+    private static final String PREFIX_DAU = "dau";
+
+    //使用redis缓存在定时区间内帖子score有变动的帖子
+    // key 前缀
+    private static final String PREFIX_DISCUSSPOST = "discuss";
+
+
     //生成某个实体的赞数量的KEY
     //存入实体的相关信息（类型，id）
     //key->value   like:entity:entityType:entityId -> set(userId)  便于得知谁给点了赞，集合也容易统计点赞数等等
@@ -79,6 +90,34 @@ public class RedisKeyUtil {
     // 使用字符串缓存用户信息  用户id  -> 用户信息
     public static String GetUserKey(int userId){
         return PREFIX_USER + SPLIT + userId;
+    }
+
+    //返回单日[若要一周或者其他，则可以使用HyperLogLog的合并功能] UV  key
+    //date  日期的字符串，包括年月日
+    public static String GetUVKey(String date){
+        return PREFIX_UV + SPLIT + date;
+    }
+
+    //区间UV合并 key
+    public static String GetUVKey(String startDate,String endDate){
+        return PREFIX_UV + SPLIT + startDate + SPLIT + endDate;
+    }
+
+    //返回单日 DAU key
+    //传入日期  date  年月日
+    public static String GetDAUKey(String date){
+        return PREFIX_DAU + SPLIT + date;
+    }
+
+    //区间DAU合并 key
+    public static String GetDAUKey(String startDate,String endDate){
+        return PREFIX_DAU + SPLIT + startDate + SPLIT + endDate;
+    }
+
+    //返回定时区间内 score 发生变化的帖子  key
+    //不需要传入参数
+    public static String GetDiscussScoreKey(){
+        return PREFIX_DISCUSSPOST + SPLIT + "score";
     }
 
 

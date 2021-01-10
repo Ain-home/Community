@@ -61,15 +61,15 @@ public class ElasticSearchTest {
     @Test
     public void testInsertList(){
         //插入discuss_post表中的大部分数据
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(101,0,100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(102,0,100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(103,0,100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(111,0,100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(112,0,100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(131,0,100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(132,0,100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(133,0,100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(134,0,100));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(101,0,100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(102,0,100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(103,0,100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(111,0,100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(112,0,100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(131,0,100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(132,0,100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(133,0,100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(134,0,100,0));
     }
 
     //修改数据 id=231

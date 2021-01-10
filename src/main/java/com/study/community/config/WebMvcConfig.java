@@ -1,5 +1,6 @@
 package com.study.community.config;
 
+import com.study.community.interceptor.DataInterceptor;
 import com.study.community.interceptor.LoginRequiredInterceptor;
 import com.study.community.interceptor.LoginTicketInterceptor;
 import com.study.community.interceptor.MessageInterceptor;
@@ -20,11 +21,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private LoginTicketInterceptor loginTicketInterceptor;
 
-    @Autowired
-    private LoginRequiredInterceptor loginRequiredInterceptor;
+    //使用Security替代
+//    @Autowired
+//    private LoginRequiredInterceptor loginRequiredInterceptor;
 
     @Autowired
     private MessageInterceptor messageInterceptor;
+
+    //数据统计
+    @Autowired
+    private DataInterceptor dataInterceptor;
 
     //注册拦截器
     @Override
@@ -35,13 +41,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 //拦截其他所有路径
 
         //LoginRequiredInterceptor拦截器筛选掉所有静态资源的过滤，不做处理，提高效率；其他所有请求都进行拦截处理
-        registry.addInterceptor(loginRequiredInterceptor)
-                .excludePathPatterns("/*/*.css", "/*/*.js", "/*/*.png", "/*/*.jpg", "/*/*.jpeg");
+//        registry.addInterceptor(loginRequiredInterceptor)
+//                .excludePathPatterns("/*/*.css", "/*/*.js", "/*/*.png", "/*/*.jpg", "/*/*.jpeg");
 
         //拦截所有动态请求
         registry.addInterceptor(messageInterceptor)
                 .excludePathPatterns("/*/*.css", "/*/*.js", "/*/*.png", "/*/*.jpg", "/*/*.jpeg");
 
+        //拦截每次网站的访问，统计数据
+        registry.addInterceptor(dataInterceptor)
+                .excludePathPatterns("/*/*.css", "/*/*.js", "/*/*.png", "/*/*.jpg", "/*/*.jpeg");
     }
 
 }

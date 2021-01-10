@@ -6,6 +6,10 @@ import com.study.community.service.UserService;
 import com.study.community.utils.CookieUtil;
 import com.study.community.utils.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -47,6 +51,12 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
                 //在本次请求中持有用户信息（注意在多线程应用中隔离不同的用户，应用 ThreadLocal 存储类）
                 //将数据存入到当前线程的ThreadLocal的map中，当请求没有处理完，这个线程就一直在；当请求结束，线程才被销毁
                 hostHolder.setUser(user);
+
+                //构建用户登录认证的结果，并存入SecurityContext,便于Security进行授权
+                //通过账号密码认证,传入参数：user,password,用户权限;构造用户登录认证的结果
+                Authentication authentication = new UsernamePasswordAuthenticationToken(user,user.getPassword(),userService.GetAuthorities(user.getId()));
+                //存入SecurityContext
+                SecurityContextHolder.setContext(new SecurityContextImpl(authentication));
             }
         }
 
@@ -64,9 +74,10 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
         }
     }
 
-    //在请求结束后，清除掉保存的用户信息
+    //在请求结束后，清除掉保存的用户信息，清理SecurityContext保存的权限信息
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         hostHolder.clear();
+        SecurityContextHolder.clearContext();
     }
 }

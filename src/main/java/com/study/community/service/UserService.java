@@ -2,7 +2,9 @@ package com.study.community.service;
 
 import com.study.community.entity.LoginTicket;
 import com.study.community.entity.User;
+import org.springframework.security.core.GrantedAuthority;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -34,5 +36,8 @@ public interface UserService {
 
     //更新用户头像
     int updateUserHeader(int userId, String headerUrl);
+
+    //获取id用户权限
+    public Collection<? extends GrantedAuthority> GetAuthorities(int userId);
 
 }

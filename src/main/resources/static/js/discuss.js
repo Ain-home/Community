@@ -1,3 +1,66 @@
+// 页面加载完后绑定事件
+$(function () {
+    //给三个按钮绑定单击事件  提交异步请求
+    $("#topBtn").click(setTop);
+    $("#wonderfulBtn").click(setWonderful);
+    $("#deleteBtn").click(setDelete);
+});
+
+//置顶
+function setTop() {
+    $.post(
+        CONTEXT_PATH + "/discuss/top",
+        {"id":$("#DiscussPostId").val()},
+        function (data) {
+            data = $.parseJSON(data);
+            if(data.code == 0){
+                //成功，修改按钮属性
+                $("#topBtn").attr("disabled","disabled");
+            }else {
+                //失败
+                alert(data.msg);
+            }
+        }
+    );
+}
+
+//加精
+function setWonderful() {
+    $.post(
+        CONTEXT_PATH + "/discuss/wonderful",
+        {"id":$("#DiscussPostId").val()},
+        function (data) {
+            data = $.parseJSON(data);
+            if(data.code == 0){
+                //成功，修改按钮属性
+                $("#wonderfulBtn").attr("disabled","disabled");
+            }else {
+                //失败
+                alert(data.msg);
+            }
+        }
+    );
+}
+
+//删除
+function setDelete() {
+    $.post(
+        CONTEXT_PATH + "/discuss/delete",
+        {"id":$("#DiscussPostId").val()},
+        function (data) {
+            data = $.parseJSON(data);
+            if(data.code == 0){
+                //成功，跳转回首页
+                location.href = CONTEXT_PATH + "/index";
+            }else {
+                //失败
+                alert(data.msg);
+            }
+        }
+    );
+}
+
+//点赞
 function like(btn,entityType,entityId,entityUserId,discussPostId) {
     //发送异步请求，提交数据
     $.post(

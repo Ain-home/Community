@@ -11,9 +11,11 @@ import com.study.community.service.UserService;
 import com.study.community.utils.CommunityConstant;
 import com.study.community.utils.CommunityUtil;
 import com.study.community.utils.HostHolder;
+import com.study.community.utils.RedisKeyUtil;
 import com.study.community.vo.Event;
 import com.study.community.vo.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +46,10 @@ public class DiscussPostController implements CommunityConstant {
     @Autowired
     private EventProducer eventProducer;
 
+    //计算帖子score【暂时先将score发生变化的帖子收集起来，定时计算score】，需要使用redis
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     @Autowired
     private HostHolder hostHolder;
 
@@ -67,7 +73,7 @@ public class DiscussPostController implements CommunityConstant {
         discussPost.setCreateTime(new Date());
         discussPostService.addDiscussPost(discussPost);
 
-        //发布帖子后，触发发帖事件（把新发布的帖子添加到es中）
+        //发布【更新】帖子后，触发发帖事件（把新发布的帖子添加到es中）
         Event event =new Event()
                 .setTopic(TOPIC_PUBLISH)
                 .setUserId(user.getId())
@@ -75,6 +81,10 @@ public class DiscussPostController implements CommunityConstant {
                 .setEntityId(discussPost.getId());
         //EntityUserId用不上，可以省略
         eventProducer.fireEvent(event);
+
+        //帖子新增时，将帖子存储到set集合中【定时计算帖子score】
+        String redisKey = RedisKeyUtil.GetDiscussScoreKey();
+        redisTemplate.opsForSet().add(redisKey,discussPost.getId());
 
         //报错情况额外处理（全局错误处理）
         return CommunityUtil.GetJSON(0,"发布成功！");
@@ -156,6 +166,71 @@ public class DiscussPostController implements CommunityConstant {
         model.addAttribute("comments",commentVoList);
 
         return "site/discuss-detail";
+    }
+
+    //置顶  异步请求
+    @PostMapping("/top")
+    @ResponseBody
+    public String setTop(int id){
+        // type = 1 表示帖子置顶
+        discussPostService.updateType(id,1);
+
+        //帖子信息变化后，将帖子数据同步到es服务器中
+        //再次触发发帖【更新】事件
+        Event event =new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(ENTITY_TYPE_DISCUSS)
+                .setEntityId(id);
+        //EntityUserId用不上，可以省略
+        eventProducer.fireEvent(event);
+
+        //返回JSON数据
+        return CommunityUtil.GetJSON(0);
+    }
+
+    //加精
+    @PostMapping("/wonderful")
+    @ResponseBody
+    public String setWonderful(int id){
+        // status = 1  表示精华帖
+        discussPostService.updateStatus(id,1);
+
+        //帖子信息变化后，将帖子数据同步到es服务器中
+        //再次触发发帖【更新】事件
+        Event event =new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(ENTITY_TYPE_DISCUSS)
+                .setEntityId(id);
+        //EntityUserId用不上，可以省略
+        eventProducer.fireEvent(event);
+
+        //加精操作会影响帖子score，加入到要定时计算帖子score的set集合中
+        String redisKey = RedisKeyUtil.GetDiscussScoreKey();
+        redisTemplate.opsForSet().add(redisKey,id);
+
+        return CommunityUtil.GetJSON(0);
+    }
+
+    //删除
+    @PostMapping("/delete")
+    @ResponseBody
+    public String setDelete(int id){
+        // status = 2  表示删除 拉黑
+        discussPostService.updateStatus(id,2);
+
+        //帖子信息变化后，将帖子数据同步到es服务器中
+        //触发删帖事件
+        Event event =new Event()
+                .setTopic(TOPIC_DELETE)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(ENTITY_TYPE_DISCUSS)
+                .setEntityId(id);
+        //EntityUserId用不上，可以省略
+        eventProducer.fireEvent(event);
+
+        return CommunityUtil.GetJSON(0);
     }
 
 }

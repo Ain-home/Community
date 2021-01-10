@@ -7,9 +7,11 @@ import com.study.community.service.LikeService;
 import com.study.community.utils.CommunityConstant;
 import com.study.community.utils.CommunityUtil;
 import com.study.community.utils.HostHolder;
+import com.study.community.utils.RedisKeyUtil;
 import com.study.community.vo.Event;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +39,11 @@ public class LikeController implements CommunityConstant {
     //使用kafka发送系统通知,注入事件生产者
     @Autowired
     private EventProducer eventProducer;
+
+    //点赞时，帖子score发生变化，将该帖子加到定时计算score的set中
+    //set缓存在redis中
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     //异步请求（点赞）  POST请求
     @PostMapping("/like")
@@ -69,6 +76,13 @@ public class LikeController implements CommunityConstant {
                     //其他数据（点击查看时可以查看被点赞帖子的详情）
                     .setData("discussPostId",discussPostId);
             eventProducer.fireEvent(event);
+        }
+
+        //只有对帖子点赞才会影响帖子的score
+        if(entityType == ENTITY_TYPE_DISCUSS){
+            //添加到redis的set中
+            String redisKey = RedisKeyUtil.GetDiscussScoreKey();
+            redisTemplate.opsForSet().add(redisKey,discussPostId);
         }
 
         //返回JSON格式数据

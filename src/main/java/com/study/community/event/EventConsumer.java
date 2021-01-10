@@ -13,9 +13,11 @@ import org.omg.CORBA.PUBLIC_MEMBER;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +43,12 @@ public class EventConsumer implements CommunityConstant {
     //维护es服务器中的数据
     @Autowired
     private ElasticsearchService elasticsearchService;
+
+    //分享功能 生成网页截图 kafka
+    @Value("${wk.image.command}")
+    private String wkImageCommand;
+    @Value("${wk.image.storage}")
+    private String wkImageStorage;
 
     //一个方法消费一个/多个主题
     @KafkaListener(topics = {TOPIC_COMMENT, TOPIC_LIKE, TOPIC_FOLLOW})
@@ -110,6 +118,63 @@ public class EventConsumer implements CommunityConstant {
         DiscussPost discussPost = discussPostService.findDiscussPostById(event.getEntityId());
         //向es中新增数据（更新则是覆盖旧数据）
         elasticsearchService.saveDiscussPost(discussPost);
+    }
+
+    //消费删帖事件
+    @KafkaListener(topics = {TOPIC_DELETE})
+    public void handlerDeleteMessage(ConsumerRecord record){
+        if(record == null || record.value() == null){
+            //如果消息为空或者消息的内容为空
+            //记录日志
+            logger.error("消息的内容为空！");
+            return;
+        }
+
+        //生产者发送的消息内容为JSON格式的字符串，需要将该JSON字符串重新解析为对象
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if(event == null){
+            //如果消息内容无法还原为Event对象
+            logger.error("消息格式错误！");
+            return;
+        }
+
+        //向es中删除数据
+        elasticsearchService.deleteDiscussPost(event.getEntityId());
+    }
+
+    //消费分享事件
+    @KafkaListener(topics = TOPIC_SHARE)
+    public void handlerShareMessage(ConsumerRecord record){
+        if(record == null || record.value() == null){
+            //如果消息为空或者消息的内容为空
+            //记录日志
+            logger.error("消息的内容为空！");
+            return;
+        }
+
+        //生产者发送的消息内容为JSON格式的字符串，需要将该JSON字符串重新解析为对象
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if(event == null){
+            //如果消息内容无法还原为Event对象
+            logger.error("消息格式错误！");
+            return;
+        }
+
+        String htmlUrl = (String) event.getData().get("htmlUrl");
+        String fileName = (String) event.getData().get("fileName");
+        String suffix = (String) event.getData().get("suffix");
+
+        //拼接cmd命令（图片压缩75%）
+        String cmd = wkImageCommand + " --quality 75 "
+                + htmlUrl + " " + wkImageStorage + "/" + fileName + suffix;
+
+        //执行命令
+        try {
+            Runtime.getRuntime().exec(cmd);
+            logger.info("生成长图成功:" + cmd);
+        } catch (IOException e) {
+            logger.error("生成长图失败：" + e.getMessage());
+        }
     }
 
 }

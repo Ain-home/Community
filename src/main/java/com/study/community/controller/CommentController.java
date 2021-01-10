@@ -7,8 +7,10 @@ import com.study.community.service.CommentService;
 import com.study.community.service.DiscussPostService;
 import com.study.community.utils.CommunityConstant;
 import com.study.community.utils.HostHolder;
+import com.study.community.utils.RedisKeyUtil;
 import com.study.community.vo.Event;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +39,11 @@ public class CommentController implements CommunityConstant {
     //使用kafka发送系统通知,注入事件生产者
     @Autowired
     private EventProducer eventProducer;
+
+    //评论时，帖子score发生变化，将该帖子加到定时计算score的set中
+    //set缓存在redis中
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     //增加评论（页面上提交评论的内容，隐含传入实体entity的类型和id[帖子还是评论],还有targetId回复用户的id，将这些信息封装到Comment实体中）
     @PostMapping("/add/{discussPostId}")
@@ -84,6 +91,10 @@ public class CommentController implements CommunityConstant {
                     .setEntityId(discussPostId);
             //EntityUserId用不上，可以省略
             eventProducer.fireEvent(event);
+
+            //只有评论帖子时，才会影响帖子score
+            String redisKey = RedisKeyUtil.GetDiscussScoreKey();
+            redisTemplate.opsForSet().add(redisKey,discussPostId);
         }
 
         //重定向到帖子详情页面

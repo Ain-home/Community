@@ -71,7 +71,47 @@ spring:
 
   # ElasticsearchProperties
   # Elasticsearch 配置（7.x版本需要编写配置类）
-  
+
+  # Spring 线程池配置
+  task:
+    # TaskExecutionProperties
+    execution:
+      pool:
+        # 最大线程数量
+        max-size: 15
+        # 核心线程数量（线程池创建好后默认自带5个线程，不够用时自动扩容直至15个）
+        core-size: 5
+        # 队列的容量（任务等待队列）
+        queue-capacity: 100
+    # TaskSchedulingProperties
+    scheduling:
+      pool:
+        size: 5
+
+  # Spring Quartz 配置
+  # QuartzProperties
+  quartz:
+    # 任务的存储方式
+    job-store-type: jdbc
+    # 调度器的名字
+    scheduler-name: communityScheduler
+    properties:
+      org:
+        quartz:
+          # 调度器的id自动生成
+          scheduler:
+            instanceId: AUTO
+          jobStore:
+            # 执行任务存到数据库中的类
+            class: org.quartz.impl.jdbcjobstore.JobStoreTX
+            # JDBC的驱动
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            # 是否采用集群的方式
+            isClustered: true
+          # 使用哪个线程池
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 5
 
 # MybatisProperties
 # mybatis 配置
@@ -100,4 +140,23 @@ community:
     domain: http://localhost:8888
     # 上传文件保存的路径
     upload: d:/study/idea-workspace/SpringBoot-bbs/upload-imgs
+
+# 自定义的配置 wk
+wk:
+  image:
+    # 命令前缀（相同部分）
+    command: D:/study/wkhtmltopdf/wkhtmltox-0.12.6-1.msvc2015-win64/bin/wkhtmltoimage
+    # 生成图片存放路径（文件夹）
+    storage: d:/study/wkhtmltopdf/wk-images
+
+# 自定义的配置 caffeine 单独使用（不整合到spring） 缓存工具
+caffeine:
+  # 帖子的缓存
+  discuss:
+    # 最大缓存数量
+    max-size: 15
+    # 缓存过期时间 单位是秒  定时自动淘汰
+    expire-seconds: 180
+
+
 

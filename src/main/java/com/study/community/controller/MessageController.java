@@ -177,9 +177,9 @@ public class MessageController implements CommunityConstant {
         //查询评论类的通知
         Message message = messageService.findLatestNotice(user.getId(),TOPIC_COMMENT);
         System.out.println(message);
-        //封装数据
-        Map<String, Object> messageVo = new HashMap<>();
         if(message != null){
+            //封装数据
+            Map<String, Object> messageVo = new HashMap<>();
             messageVo.put("message",message);
 
             //将message的content从JSON字符串转义解析为map对象
@@ -199,15 +199,14 @@ public class MessageController implements CommunityConstant {
             //封装这一类通知未读的数量
             int unreadCount = messageService.findNoticeUnreadCount(user.getId(),TOPIC_COMMENT);
             messageVo.put("unreadCount",unreadCount);
+            model.addAttribute("commentNotice",messageVo);
         }
-        System.out.println(messageVo);
-        model.addAttribute("commentNotice",messageVo);
 
         //查询点赞类的通知
         message = messageService.findLatestNotice(user.getId(),TOPIC_LIKE);
-        //封装数据
-        messageVo = new HashMap<>();
         if(message != null){
+            //封装数据
+            Map<String, Object> messageVo = new HashMap<>();
             messageVo.put("message",message);
 
             //将message的content从JSON字符串转义解析为map对象
@@ -227,14 +226,14 @@ public class MessageController implements CommunityConstant {
             //封装这一类通知未读的数量
             int unreadCount = messageService.findNoticeUnreadCount(user.getId(),TOPIC_LIKE);
             messageVo.put("unreadCount",unreadCount);
+            model.addAttribute("likeNotice",messageVo);
         }
-        model.addAttribute("likeNotice",messageVo);
 
         //查询关注类的通知
         message = messageService.findLatestNotice(user.getId(),TOPIC_FOLLOW);
-        //封装数据
-        messageVo = new HashMap<>();
         if(message != null){
+            //封装数据
+            Map<String, Object> messageVo = new HashMap<>();
             messageVo.put("message",message);
 
             //将message的content从JSON字符串转义解析为map对象
@@ -253,8 +252,8 @@ public class MessageController implements CommunityConstant {
             //封装这一类通知未读的数量
             int unreadCount = messageService.findNoticeUnreadCount(user.getId(),TOPIC_FOLLOW);
             messageVo.put("unreadCount",unreadCount);
+            model.addAttribute("followNotice",messageVo);
         }
-        model.addAttribute("followNotice",messageVo);
 
         //三类系统通知的未读总和
         int noticeUnreadCount = messageService.findNoticeUnreadCount(user.getId(),null);
